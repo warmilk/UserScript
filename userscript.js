@@ -252,35 +252,38 @@
         var id = '#' + ELEMENTID[languageTag]
         return document.querySelector(id)
     }
-    // 生成某一帧的字幕
-    function GenerateOnceFrameCaption(captionContentList, targetNode) {
-        videoNode.currentTime = videoNode.currentTime * 1000; //<video>元素的currentTime属性单位为秒
-        if (captionContentList != null && captionContentList instanceof Array) {
-            for (var i = 0; i < captionContentList.length; i++) {
-                var item = captionContentList[i];
-                if (!item || !item.segs || !(item.segs instanceof Array)) {
-                    continue;
-                }
-                if (videoNode.currentTime >= item.tStartMs && videoNode.currentTime <= item.tStartMs + item.dDurationMs) {
-                    if (targetNode !== null) {
-                        try {
-                            var text = [];
-                            for (var k = 0; k < item.segs.length; k++) {
-                                text.push(item.segs[k].utf8);
-                            }
-                            var displayText = text.join(' ');
-                            displayText = displayText.replace(/\s+/ig, ' ');
-                            if (targetNode.innerText !== displayText) {
-                                targetNode.innerText = displayText;
-                            }
-                        } catch (err) {
-                            continue;
-                        }
+
+    function AutoCaption(captionContentList, targetNode) {
+        setInterval(function() {
+            videoNode.currentTime = videoNode.currentTime * 1000; //<video>元素的currentTime属性单位为秒
+            if (captionContentList != null && captionContentList instanceof Array) {
+                for (var i = 0; i < captionContentList.length; i++) {
+                    var item = captionContentList[i];
+                    if (!item || !item.segs || !(item.segs instanceof Array)) {
+                        continue;
                     }
-                    break;
+                    if (videoNode.currentTime >= item.tStartMs && videoNode.currentTime <= item.tStartMs + item.dDurationMs) {
+                        if (targetNode !== null) {
+                            try {
+                                var text = [];
+                                for (var k = 0; k < item.segs.length; k++) {
+                                    text.push(item.segs[k].utf8);
+                                }
+                                var displayText = text.join(' ');
+                                displayText = displayText.replace(/\s+/ig, ' ');
+                                if (targetNode.innerText !== displayText) {
+                                    targetNode.innerText = displayText;
+                                }
+                            } catch (err) {
+                                continue;
+                            }
+                        }
+                        break;
+                    }
                 }
             }
-        }
+        }, 300);
+
     }
 
     /**
@@ -290,11 +293,10 @@
      * @param languageTag {String} zh：中文，en：英文
      */
     function InjectCaptionsToPage(captionContentList, languageTag) {
-        setInterval(function() {
-            var targetNode = GetTackNode(languageTag); //{HTMLnode} 字幕轨道的html元素节点（注入数据的目标节点）
-            videoNode = document.querySelector('video.video-stream.html5-main-video') //<video>标签对应的元素
-            GenerateOnceFrameCaption(captionContentList, targetNode)
-        }, 300);
+        var targetNode = GetTackNode(languageTag); //{HTMLnode} 字幕轨道的html元素节点（注入数据的目标节点）
+        videoNode = document.querySelector('video.video-stream.html5-main-video') //<video>标签对应的元素
+        AutoCaption(captionContentList, targetNode)
+
 
     }
 
