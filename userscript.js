@@ -6,7 +6,7 @@
 // @match        *://m.youtube.com/watch?v=*
 // @grant        unsafeWindow
 // @author       github@warmilk
-// @version      1.0.2
+// @version      1.0.3
 // @description  专门针对油管手机版：自动打开声音，自动开启字幕并机翻中英双语，自动跳广告。安卓浏览器可使用Firefox或者旧版本yandex。有问题联系：知乎@邓强龙，不一定每个视频都有中英字幕。 测试中英双语字幕视频网址： https: //m.youtube.com/watch?v=xFQGKwVijaM&t=2s
 // ==/UserScript==
 
@@ -268,8 +268,8 @@
     function InjectCaptionsToPage(captionContentList, languageTag) {
         var targetNode = GetTackNode(languageTag); //{HTMLnode} 字幕轨道的html元素节点（注入数据的目标节点）
         videoNode = document.querySelector('video.video-stream.html5-main-video') //<video>标签对应的元素
-        videoNode.addEventListener('timeupdate', function() {
-            setInterval(function() {
+        setInterval(function() {
+            videoNode.addEventListener('timeupdate', function() {
                 videoNode.currentTime = videoNode.currentTime * 1000; //<video>元素的currentTime属性单位为秒
                 if (captionContentList != null && captionContentList instanceof Array) {
                     for (var i = 0; i < captionContentList.length; i++) {
@@ -297,8 +297,8 @@
                         }
                     }
                 }
-            }, 300);
-        })
+            })
+        }, 300);
     }
 
     function Main() {
