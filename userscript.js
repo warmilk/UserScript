@@ -6,7 +6,7 @@
 // @match        *://m.youtube.com/watch?v=*
 // @grant        unsafeWindow
 // @author       github@warmilk
-// @version      1.0.0
+// @version      1.0.1
 // @description  专门针对油管手机版：自动打开声音，自动开启字幕并机翻中英双语，自动跳广告。安卓浏览器可使用Firefox或者旧版本yandex。有问题联系：知乎@邓强龙，不一定每个视频都有中英字幕。 测试中英双语字幕视频网址： https: //m.youtube.com/watch?v=xFQGKwVijaM&t=2s
 // ==/UserScript==
 
