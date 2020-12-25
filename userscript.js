@@ -1,17 +1,19 @@
 // ==UserScript==
 // @name         YouTube移动端中英双语字幕
-// @namespace    https://github.com/wlpha/Youtube-Automatic-Translation-V2
+// @namespace    https://github.com/warmilk/UserScript
 // @match        *://m.youtube.com
 // @match        *://m.youtube.com/*
 // @match        *://m.youtube.com/watch?v=*
 // @grant        unsafeWindow
 // @author       github@warmilk
-// @version      1.0.1
+// @version      1.0.2
 // @description  专门针对油管手机版：自动打开声音，自动开启字幕并机翻中英双语，自动跳广告。安卓浏览器可使用Firefox或者旧版本yandex。有问题联系：知乎@邓强龙，不一定每个视频都有中英字幕。 测试中英双语字幕视频网址： https: //m.youtube.com/watch?v=xFQGKwVijaM&t=2s
 // ==/UserScript==
 
 
 (function() {
+    // @require      https://cdn.bootcdn.net/ajax/libs/vConsole/2.5.0/vconsole.min.js
+    // const vConsole = new VConsole();
     const FORMET_SUFFIX = '&fmt=json3&xorb=2&xobt=3&xovt=3&tlang='
     const THIS = this; //当前作用域的window对象
     const ELEMENTID = { //字幕轨道的HTML元素的id属性值
@@ -30,8 +32,8 @@
         en: '', //英文字幕str格式array json的下载地址
     }
     var isHasCaption = { //该视频是否存在某种语言的字幕
-        zh: false,
-        en: false,
+        zh: true,
+        en: true,
     }
     var videoNode //video标签的dom节点
 
@@ -203,6 +205,10 @@
     //创建字幕控件的 HTML dom结构
     function CreateCaptionWidget() {
         var videoPlayerWrapper = document.querySelector('#player-container-id')
+        if (videoPlayerWrapper == null) {
+            console.log('无法获取#player-container-id的元素，导致无法创建字幕控件html dom');
+            return;
+        }
         var captionWidget = document.createElement('div');
         videoPlayerWrapper.appendChild(captionWidget)
         if (isHasCaption.zh && isHasCaption.en) {
@@ -253,39 +259,6 @@
         return document.querySelector(id)
     }
 
-    function AutoCaption(captionContentList, targetNode) {
-        setInterval(function() {
-            videoNode.currentTime = videoNode.currentTime * 1000; //<video>元素的currentTime属性单位为秒
-            if (captionContentList != null && captionContentList instanceof Array) {
-                for (var i = 0; i < captionContentList.length; i++) {
-                    var item = captionContentList[i];
-                    if (!item || !item.segs || !(item.segs instanceof Array)) {
-                        continue;
-                    }
-                    if (videoNode.currentTime >= item.tStartMs && videoNode.currentTime <= item.tStartMs + item.dDurationMs) {
-                        if (targetNode !== null) {
-                            try {
-                                var text = [];
-                                for (var k = 0; k < item.segs.length; k++) {
-                                    text.push(item.segs[k].utf8);
-                                }
-                                var displayText = text.join(' ');
-                                displayText = displayText.replace(/\s+/ig, ' ');
-                                if (targetNode.innerText !== displayText) {
-                                    targetNode.innerText = displayText;
-                                }
-                            } catch (err) {
-                                continue;
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-        }, 300);
-
-    }
-
     /**
      * 把字幕数据注入到页面（str就是time txt也就是带时间轴的txt）
      * 
@@ -295,9 +268,38 @@
     function InjectCaptionsToPage(captionContentList, languageTag) {
         var targetNode = GetTackNode(languageTag); //{HTMLnode} 字幕轨道的html元素节点（注入数据的目标节点）
         videoNode = document.querySelector('video.video-stream.html5-main-video') //<video>标签对应的元素
-        AutoCaption(captionContentList, targetNode)
-
-
+        setInterval(function() {
+            videoNode.addEventListener('timeupdate', function() {
+                videoNode.currentTime = videoNode.currentTime * 1000; //<video>元素的currentTime属性单位为秒
+                console.log(videoNode.currentTime);
+                if (captionContentList != null && captionContentList instanceof Array) {
+                    for (var i = 0; i < captionContentList.length; i++) {
+                        var item = captionContentList[i];
+                        if (!item || !item.segs || !(item.segs instanceof Array)) {
+                            continue;
+                        }
+                        if (videoNode.currentTime >= item.tStartMs && videoNode.currentTime <= item.tStartMs + item.dDurationMs) {
+                            if (targetNode !== null) {
+                                try {
+                                    var text = [];
+                                    for (var k = 0; k < item.segs.length; k++) {
+                                        text.push(item.segs[k].utf8);
+                                    }
+                                    var displayText = text.join(' ');
+                                    displayText = displayText.replace(/\s+/ig, ' ');
+                                    if (targetNode.innerText !== displayText) {
+                                        targetNode.innerText = displayText;
+                                    }
+                                } catch (err) {
+                                    continue;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            })
+        }, 300);
     }
 
     function Main() {
