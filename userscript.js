@@ -268,10 +268,9 @@
     function InjectCaptionsToPage(captionContentList, languageTag) {
         var targetNode = GetTackNode(languageTag); //{HTMLnode} 字幕轨道的html元素节点（注入数据的目标节点）
         videoNode = document.querySelector('video.video-stream.html5-main-video') //<video>标签对应的元素
-        setInterval(function() {
-            videoNode.addEventListener('timeupdate', function() {
+        videoNode.addEventListener('timeupdate', function() {
+            setInterval(function() {
                 videoNode.currentTime = videoNode.currentTime * 1000; //<video>元素的currentTime属性单位为秒
-                console.log(videoNode.currentTime);
                 if (captionContentList != null && captionContentList instanceof Array) {
                     for (var i = 0; i < captionContentList.length; i++) {
                         var item = captionContentList[i];
@@ -298,8 +297,8 @@
                         }
                     }
                 }
-            })
-        }, 300);
+            }, 300);
+        })
     }
 
     function Main() {
